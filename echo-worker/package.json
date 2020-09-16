@@ -1,0 +1,27 @@
+{
+  "name": "echo-worker",
+  "version": "1.0.0",
+  "description": "Test of WASM/WebWorker/CRA Stack",
+  "main": "./dist/echo-worker.js",
+  "dependencies": {
+    "webworkify": "^1.5.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.8.4",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-react": "^7.7.4",
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^10.1.0",
+    "babelify": "^10.0.0",
+    "browserify": "^16.2.2",
+    "eslint": "^7.1.0",
+    "post-buffer": "file:../../../proj/post-buffer"
+  },
+  "scripts": {
+    "build": "npx browserify --standalone echo-worker.js ./echo-worker.js > ./dist/echo-worker.js -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ]",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "K Rhoda",
+  "license": "MIT"
+}
