@@ -16,7 +16,7 @@
     "babelify": "^10.0.0",
     "browserify": "^16.2.2",
     "eslint": "^7.1.0",
-    "post-buffer": "file:../../../proj/post-buffer"
+    "post-buffer": "^0.0.1"
   },
   "scripts": {
     "build": "npx browserify --standalone echo-worker.js ./echo-worker.js > ./dist/echo-worker.js -t [ babelify --presets [ @babel/preset-env @babel/preset-react ] ]",

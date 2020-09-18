@@ -10,7 +10,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-scripts": "3.4.3",
-    "post-buffer": "file:../../../proj/post-buffer"
+    "post-buffer": "^0.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
