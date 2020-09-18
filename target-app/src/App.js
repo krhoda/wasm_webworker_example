@@ -1,6 +1,6 @@
 import React, {useEffect} from 'react';
 import logo from './logo.svg';
-import {makeEchoWorker} from "echo-worker";
+import {makeEchoWorker}  from 'workers';
 import * as pb from "post-buffer";
 import './App.css';
 
