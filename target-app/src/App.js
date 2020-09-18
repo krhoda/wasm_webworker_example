@@ -11,15 +11,22 @@ function App() {
     echoWorker.onmessage = (msg) => {
       console.log(msg);
       let {data} = msg;
-      let result = pb.bufferToJSON(data);
+      let [result, errMsg] = pb.bufferToJSON(data);
 
       if (result) {
         console.log("UI thread heard:")
         console.log(result);
+      } else {
+        console.error("Error in UI unpacking buffer:")
+        console.error(errMsg);
       }
     };
 
-    pb.postBuffer({hello: "world"}, echoWorker);
+    let [success, errMsg2] = pb.postBuffer({hello: "world"}, echoWorker);
+    if (!success) {
+        console.error("Error in UI posting buffer:")
+        console.error(errMsg2);
+    }
   }, []);
 
   return (

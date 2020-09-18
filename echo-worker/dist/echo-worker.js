@@ -1,97 +1,97 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}(g.echoWorker || (g.echoWorker = {})).js = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postBuffer = exports.stringToBuffer = exports.jsonToBuffer = exports.bufferToString = exports.bufferToJSON = void 0;
+exports.postBuffer = exports.bufferToString = exports.bufferToJSON = void 0;
 var post_buffer_1 = require("./post-buffer");
 Object.defineProperty(exports, "bufferToJSON", { enumerable: true, get: function () { return post_buffer_1.bufferToJSON; } });
 Object.defineProperty(exports, "bufferToString", { enumerable: true, get: function () { return post_buffer_1.bufferToString; } });
-Object.defineProperty(exports, "jsonToBuffer", { enumerable: true, get: function () { return post_buffer_1.jsonToBuffer; } });
-Object.defineProperty(exports, "stringToBuffer", { enumerable: true, get: function () { return post_buffer_1.stringToBuffer; } });
 Object.defineProperty(exports, "postBuffer", { enumerable: true, get: function () { return post_buffer_1.postBuffer; } });
 
 },{"./post-buffer":2}],2:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.postBuffer = exports.bufferToJSON = exports.bufferToString = exports.stringToBuffer = exports.jsonToBuffer = void 0;
+exports.postBuffer = exports.bufferToJSON = exports.bufferToString = void 0;
 function jsonToBuffer(json) {
     try {
         let str = JSON.stringify(json);
         return stringToBuffer(str);
     }
     catch (err) {
-        console.error(`Error in post-worker: Could not process argument into buffer: ${err}`);
-        return false;
+        let nextErr = `Error in post-buffer, could not process argument into buffer: ${err}`;
+        return [false, nextErr];
     }
 }
-exports.jsonToBuffer = jsonToBuffer;
 function stringToBuffer(str) {
+    let errMsg = '';
     try {
         let buffer = new ArrayBuffer(str.length * 2);
         let bufferView = new Uint16Array(buffer);
         for (let i = 0, stringLength = str.length; i < stringLength; i++) {
             bufferView[i] = str.charCodeAt(i);
         }
-        return buffer;
+        return [buffer, errMsg];
     }
     catch (err) {
-        console.error(`Error in post-worker: Could not process argument into buffer: ${err}`);
-        return false;
+        errMsg = `Error in post-buffer, could not process argument into buffer: ${err}`;
+        return [false, errMsg];
     }
 }
-exports.stringToBuffer = stringToBuffer;
+// bufferToString takes an ArrayBuffer (the result of postBuffer) and decodes it to a plain string
+// It returns an array of 2 values, the first being either the decoded string or false literal
+// In case a false, the second value is an error message.
 function bufferToString(buffer) {
     try {
         let result = new Uint16Array(buffer).reduce((data, byte) => {
             return data + String.fromCharCode(byte);
         }, '');
-        return result;
+        return [result, ''];
     }
     catch (err) {
-        console.error(`Error in post-worker: Could not process buffer to string: ${err}`);
-        return false;
+        let errMsg = `Error in post-buffer, could not process buffer to string, original error: ${err}`;
+        return [false, errMsg];
     }
 }
 exports.bufferToString = bufferToString;
+// bufferToJSON takes an ArrayBuffer (the result of postBuffer) and decodes it to a parsed JSON object
+// It returns an array of 2 values, the first being either the parsed JSON or false literal
+// In case a false, the second value is an error message.
 function bufferToJSON(buffer) {
-    let str = bufferToString(buffer);
+    let [str, errMsg] = bufferToString(buffer);
     if (str === false) {
-        return str;
+        return [str, errMsg];
     }
     try {
         let obj = JSON.parse(str);
-        return obj;
+        return [obj, ''];
     }
     catch (err) {
-        console.error(`Error in post-worker: Could not process buffer to JSON: ${err}, Target:`);
-        return false;
+        errMsg = `Error in post-buffer, could not process buffer to JSON, orginal error: ${err}`;
+        return [false, errMsg];
     }
 }
 exports.bufferToJSON = bufferToJSON;
+// postBuffer expects two arguements, the first being a string or something JSON stringifyable
+// the second either being the worker (if the caller is the UI thread) or the scope (if a worker)
+// Returns an array of two values, the first is boolean indicating if the operation is successful
+// If it failed, the second is the error message.
 function postBuffer(message, postable) {
     let buffer;
+    let errMsg = '';
     if (typeof message === 'object') {
-        buffer = jsonToBuffer(message);
-        if (buffer === false) {
-            return buffer;
-        }
+        [buffer, errMsg] = jsonToBuffer(message);
     }
     else if (typeof message === 'string') {
-        buffer = stringToBuffer(message);
-        if (buffer === false) {
-            return buffer;
-        }
+        [buffer, errMsg] = stringToBuffer(message);
     }
     else {
-        console.error(`Error in post-worker: Invalid message type passed, must be an Object, Array or string, was ${typeof message}`);
-        return false;
+        buffer = false;
+        errMsg = `Error in post-buffer, Invalid message type passed, must be an Object, Array or string, was ${typeof message}`;
     }
-    // if (postable) {
+    if (buffer === false) {
+        return [buffer, errMsg];
+    }
     postable.postMessage(buffer, [buffer]);
-    // } else {
-    //     // TODO: Test with worker loader
-    //     this.postMessage(buffer, [buffer]);
-    // }
-    return true;
+    return [true, ''];
 }
 exports.postBuffer = postBuffer;
 
@@ -112,21 +112,47 @@ function makeEchoWorker() {
 },{"./echo.worker.js":4,"webworkify":5}],4:[function(require,module,exports){
 "use strict";
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { if (typeof Symbol === "undefined" || !(Symbol.iterator in Object(arr))) return; var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 var pb = require('post-buffer');
 
 module.exports = function (scope) {
   scope.onmessage = function (msg) {
     var data = msg.data;
-    var result = pb.bufferToJSON(data);
+
+    var _pb$bufferToJSON = pb.bufferToJSON(data),
+        _pb$bufferToJSON2 = _slicedToArray(_pb$bufferToJSON, 2),
+        result = _pb$bufferToJSON2[0],
+        err = _pb$bufferToJSON2[1];
 
     if (!result) {
-      console.log('SEE ABOVE');
+      console.error("Err in worker while building buffer:");
+      console.error(err);
       return;
     }
 
     console.log("Echo worker heard:");
     console.log(result);
-    pb.postBuffer(result, scope);
+
+    var _pb$postBuffer = pb.postBuffer(result, scope),
+        _pb$postBuffer2 = _slicedToArray(_pb$postBuffer, 2),
+        success = _pb$postBuffer2[0],
+        err2 = _pb$postBuffer2[1];
+
+    if (!success) {
+      console.error("Err in worker while posting buffer:");
+      console.error(err2);
+    }
   };
 };
 
