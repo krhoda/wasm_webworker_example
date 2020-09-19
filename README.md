@@ -1,7 +1,7 @@
 # Rust -> WebWorker -> Create-React-App Example:
 
 ### Motivation
-Create React App is awesome, but it does not expose it's webpack loader. React Hooks are awesome, but concurrecy with them is tricky, unless you're using WebWorkers. WebWorkers are awesome because it allows the browser to leverage multicore parallelism and opt-in to tighter memory management, but have unusual instantiation semantics. WASM is awesome, but since it (currently) can't directly manipulate the DOM, it's a great fit for WebWorkers. Yet none of this works nicely with each other. UNTIL NOW!
+Create React App is awesome, but it does not expose it's webpack loader. React Hooks are awesome, but concurrency with them is tricky, unless you're using WebWorkers. WebWorkers are awesome because it allows the browser to leverage multicore parallelism and opt-in to tighter memory management, but have unusual instantiation semantics. WASM is awesome, but since it (currently) can't directly manipulate the DOM, it's a great fit for WebWorkers. Yet none of this works nicely with each other. UNTIL NOW!
 
 ### Top-Level Dependencies (i.e. the deps may have deps which may have deps, or if you speak haskell, Deps dep :: (dep, Maybe Deps dep))
 
