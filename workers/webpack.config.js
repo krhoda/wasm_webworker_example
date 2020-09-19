@@ -8,6 +8,7 @@ module.exports = {
         library: 'workers',
         libraryTarget: 'umd',
     },
+        
     module: {
         rules: [
             {
@@ -22,6 +23,16 @@ module.exports = {
                 options: {
                     presets: ['@babel/preset-env'],
                 },
+            },
+            {
+                test: /\.wasm$/,
+                type: "javascript/auto",
+                use: [{
+                    loader: "webassembly-loader",
+                    options: {
+                        export: "module"
+                    }
+                }]
             },
         ],
     },

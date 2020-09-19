@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "description": "Test of WASM/WebWorker/CRA Stack",
   "main": "./dist/workers.js",
-  "dependencies": {},
+  "dependencies": {
+    "post-buffer": "^0.0.1"
+  },
   "devDependencies": {
     "@babel/core": "^7.11.6",
     "@babel/preset-env": "^7.11.5",
     "babel-loader": "^8.1.0",
     "eslint": "^7.1.0",
-    "post-buffer": "^0.0.1",
+    "webassembly-loader": "^1.1.0",
     "webpack": "^4.44.2",
     "webpack-cli": "^3.3.12",
     "worker-loader": "^3.0.2"
