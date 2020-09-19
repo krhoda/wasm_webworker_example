@@ -1,9 +1,9 @@
 # Rust -> WebWorker -> Create-React-App Example:
 
 ### Motivation
-Create React App is awesome, but it does not expose it's webpack loader. React Hooks are awesome, and concurrecy with them is best done through WebWorkers (via paralellism, allowing the browser to finally capitalize the gains of multicore!). WASM is awesome, and since it (currently) can't directly manipulate the DOM, it's a great fit for WebWorkers. Yet none of this works nicely with each other. UNTIL NOW!
+Create React App is awesome, but it does not expose it's webpack loader. React Hooks are awesome, but concurrecy with them is tricky, unless you're using WebWorkers. WebWorkers are awesome because it allows the browser to leverage multicore parallelism and opt-in to tighter memory management, but have unusual instantiation semantics. WASM is awesome, but since it (currently) can't directly manipulate the DOM, it's a great fit for WebWorkers. Yet none of this works nicely with each other. UNTIL NOW!
 
-### Top-Level Dependencies (i.e. the deps may have deps which may have deps, or if you speak haskell, Deps :: (Deps, Maybe Deps))
+### Top-Level Dependencies (i.e. the deps may have deps which may have deps, or if you speak haskell, Deps dep :: (dep, Maybe Deps dep))
 
 [npm by way of nodejs](https://nodejs.org/en/)
 
@@ -29,7 +29,7 @@ And it will run on port `localhost:3000`, unless you have something else running
 No, just a little convoluted. The key here is pre-building the workers with an exposed webpack config so that all the WASM and WebWorker weirdness is all squared away, before plain-old-CRA imports them via functions.
 
 ### I want to make my own!
-Well, you could be lazy, just clone this repo, delete the `.git` folder, run `git init`, and tweak as needed. That's what I do. But if you really want to get your hands dirty, here are the key lines of the source. The goal is to create a generator function for usage in React allowing the following usage:
+Well, you could be lazy, just clone this repo, delete the `.git` folder, run `git init`, and tweak as needed. That's what I do. But if you really want to get your hands dirty, here are the key lines of the source. The goal is to create a generator function for usage in React allowing for the following:
 ```javascript
 const demoWorker = makeDemoWorker();
 ```
@@ -60,7 +60,7 @@ function makeDemoWorker() {
 
 export {makeDemoWorker};
 ```
-Now, this is not the traditional way to import WebWorkers or WASM, so this is how I made it work this way:
+Now, this is not the traditional way to import WebWorkers or WASM, so this is how I made it work:
 `package.json`, the relevant part:
 ```javascript
 {
@@ -81,6 +81,7 @@ Now, this is not the traditional way to import WebWorkers or WASM, so this is ho
 `webpack.config.js`, the relevant part:
 ```javascript
 {
+    ...
     module: {
         rules: [
             {
@@ -108,7 +109,7 @@ Now, this is not the traditional way to import WebWorkers or WASM, so this is ho
             },
         ],
     },
+    ...
 }
 ```
-
-And now so can you!
+And now you too can harness the power of WebWorkers, React, and Rust-WASM!
