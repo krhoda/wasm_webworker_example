@@ -4,8 +4,11 @@
 Create React App is awesome, but it does not expose it's webpack loader. React Hooks are awesome, and concurrecy with them is best done through WebWorkers (via paralellism, allowing the browser to finally capitalize the gains of multicore!). WASM is awesome, and since it (currently) can't directly manipulate the DOM, it's a great fit for WebWorkers. Yet none of this works nicely with each other. UNTIL NOW!
 
 ### Top-Level Dependencies (i.e. the deps may have deps which may have deps, or if you speak haskell, Deps :: (Deps, Maybe Deps))
+
 [npm by way of nodejs](https://nodejs.org/en/)
+
 [npx by way of npm](https://www.npmjs.com/package/npx)
+
 [wasm-pack](https://rustwasm.github.io/wasm-pack/installer/)
 
 ### Build the example:
